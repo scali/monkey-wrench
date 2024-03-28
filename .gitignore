@@ -10,6 +10,8 @@
 
 ## TERRAFORM ----------------------------------------------------------
 
+secrets.tfvars
+
 # Local .terraform directories
 **/.terraform/*
 
