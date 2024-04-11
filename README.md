@@ -167,6 +167,10 @@ terraform -chdir=terraform plan -var-file="secret.tfvars"
 terraform -chdir=terraform apply -var-file="secret.tfvars"
 ```
 
+> [!IMPORTANT]
+> keep a copy of the output IP adress
+> e.g. : ad_ip_address = "35.247.99.54"
+
 6. Once created, connect to the VM with `gcloud`
 
 ```sh
@@ -191,6 +195,37 @@ Resume the VM (make it alive) :
 gcloud compute instances resume monkey-wrench-vm
 ```
 
+### Configure the virtual machine on GCP
+
+Open a ssh session
+```sh
+## Retrieve project identifier using default project of gcloud (has been defined above)
+export PROJECT_ID=$(gcloud config get-value project)
+gcloud compute ssh --zone "us-west1-a" "monkey-wrench-vm" --project $PROJECT_ID
+```
+
+```sh
+# password is the one defined in ./terraform/secret.tfvars in the stage below
+su root
+apt update && apt install docker.io
+curl -L https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+chmod +x ~/docker-compose
+
+# create a local docker network
+docker network create -d bridge my-bridge-network
+
+
+cd ~
+git clone https://github.com/scali/monkey-wrench.git
+cd monkey-wrench
+
+cat <<EOF >>.env
+<<put here a copy of you .env file>>
+EOF
+
+# Launch mage
+docker-compose up -d
+```
 
 ### Datalake : Setup a Google storage
 
@@ -211,7 +246,10 @@ Load to GS
 
 ### Datawarehousing : Setup a BigQuery Dataset
 
-1. Create an BigQuery Dataset with `bq` CLI
+0. (Optional) Create an BigQuery Dataset with `bq` CLI
+
+> [!IMPORTANT]
+> This dataset has been initialized via terraform, this command above is just for information
 
 ```sh
 bq --location=europe-north1 mk \
@@ -219,6 +257,8 @@ bq --location=europe-north1 mk \
     --description="Monkey Wrench dataset" \
     mw_us_dataset
 ```
+
+1. 
 
 ```sh
 cat <<EOF > query.txt
