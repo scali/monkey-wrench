@@ -1,0 +1,15 @@
+version: '3'
+services:
+  magic:
+    image: mageai/mageai:latest
+    command: mage start ${PROJECT_NAME}
+    env_file:
+      - .env
+    environment:
+      USER_CODE_PATH: /home/src/${PROJECT_NAME}
+    ports:
+      - 6789:80
+    volumes:
+      - $PWD/mage:/home/src/
+      #- $PWD/gcp/keys/mw-creds.json:/home/src/mw-creds.json
+    restart: on-failure:5
