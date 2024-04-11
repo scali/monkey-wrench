@@ -67,15 +67,15 @@ flowchart TB
     end
   end
 
-	tf -- manage --> gcp
-  gcloud -- manage --> gcp
-	gs - extract --> bql
-	bql -- load --> bq
-  gs -- extract --> mage
-  mage -- transform --> mage
-  mage -- load --> bq
-  dbt -- "tranform in place" --> bq
-  bq -- query --> loo
+tf -- manage --> gcp
+gcloud -- manage --> gcp
+gs - extract --> bql
+bql -- load --> bq
+gs -- extract --> mage
+mage -- transform --> mage
+mage -- load --> bq
+dbt -- "tranform in place" --> bq
+bq -- query --> loo
 ```
 
 
