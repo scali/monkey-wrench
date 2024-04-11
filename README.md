@@ -47,35 +47,35 @@ title: Technical architecture diagram
 ---
 flowchart TB
 
-  subgraph IaaC
+	subgraph IaaC
 		tf{{Terraform}}
-    gcloud{{gcloud}}
+	gcloud{{gcloud}}
 	end
 
 	subgraph gcp [GCP]
-    subgraph "Ingest & Store"
-      gs[(Cloud Storage)]
-    end
-    subgraph "ETL-ELT & Analysis"
-      bql{{bq load}}
-      mage{{mage}}
-      dbt{{dbt}}
-      bq[(BigQuery)]
-    end
-    subgraph Dashboard
-      loo[[Looker]]
-    end
-  end
+	subgraph "Ingest & Store"
+	  gs[(Cloud Storage)]
+	end
+	subgraph "ETL-ELT & Analysis"
+	  bql{{bq load}}
+	  mage{{mage}}
+	  dbt{{dbt}}
+	  bq[(BigQuery)]
+	end
+	subgraph Dashboard
+	  loo[[Looker]]
+	end
+	end
 
-tf -- manage --> gcp
-gcloud -- manage --> gcp
-gs - extract --> bql
-bql -- load --> bq
-gs -- extract --> mage
-mage -- transform --> mage
-mage -- load --> bq
-dbt -- "tranform in place" --> bq
-bq -- query --> loo
+	tf -- manage --> gcp
+	gcloud -- manage --> gcp
+	gs -- extract --> bql
+	bql -- load --> bq
+	gs -- extract --> mage
+	mage -- transform --> mage
+	mage -- load --> bq
+	dbt -- "tranform in place" --> bq
+	bq -- query --> loo
 ```
 
 
