@@ -13,7 +13,7 @@ services:
       - default
     volumes:
       - $PWD/mage:/home/src/
-      #- $PWD/gcp/keys/mw-creds.json:/home/src/mw-creds.json
+      - $PWD/mw-creds.json:/home/src/mw-creds.json
     restart: on-failure:5
 networks:
   default:
