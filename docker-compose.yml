@@ -9,6 +9,8 @@ services:
       USER_CODE_PATH: /home/src/${PROJECT_NAME}
     ports:
       - 6789:80
+    networks:
+      - default
     volumes:
       - $PWD/mage:/home/src/
       #- $PWD/gcp/keys/mw-creds.json:/home/src/mw-creds.json
