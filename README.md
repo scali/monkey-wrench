@@ -284,12 +284,12 @@ Launch `mage`, and the pipeline named `mw_gbif_subset`
 
 Here is a screenshot of the DAG of the pipeline :
 
-![alt text](image.png)
+![alt text](images/image.png)
 
 #### Trigger / Batch Automation
 
 The pipeline is configured to run on an annual basis
 
-![alt text](image-1.png)
+![alt text](images/image-1.png)
 
 ### Visualize the data
