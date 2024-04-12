@@ -241,6 +241,8 @@ export PROJECT_ID=$(gcloud config get-value project)
 gcloud compute ssh --zone "us-west1-a" "monkey-wrench-vm" --project $PROJECT_ID
 ```
 
+Install and configure `docker`
+
 ```sh
 # password is the one defined in ./terraform/secret.tfvars in the stage below
 su root
@@ -250,14 +252,19 @@ chmod +x ~/docker-compose
 
 # create a local docker network
 docker network create -d bridge my-bridge-network
+```
 
+Clone the repository to be able to launch an instance of `mage` tool
 
+```sh
 cd ~
 git clone https://github.com/scali/monkey-wrench.git
 cd monkey-wrench
 
 cat <<EOF >>.env
-<<put here a copy of you .env file>>
+PROJECT_NAME=monkey-wrench
+REQUIRE_USER_AUTHENTICATION=1
+<<put here others secret variable you may have in your .env file>>
 EOF
 
 cat <<EOF >>mw-creds.json
@@ -280,9 +287,31 @@ Default login is `admin@admin.com`
 
 ### Workflow orchestration : Extract, Transform, Load the data
 
-Launch `mage`, and the pipeline named `mw_gbif_subset`
+Launch a web brower to `http://<ad_ip_address>` (provided by the terraform output `<ad_ip_address>`)
 
-Here is a screenshot of the DAG of the pipeline :
+`Mage` will load, then go to the pipeline named `mw_gbif_subset`
+
+#### Review configuration
+
+Please review the following configuration in the file `monkey-wrench/dbt/mw/profile.yml` , especially the parameter `project`
+
+```yaml
+bigquery-db:
+  target: staging
+  outputs:
+    staging:
+      type: bigquery
+      method: service-account
+      project: monkey-wrench-418607
+      dataset: mw_dataset
+      threads: 4 # Must be a value of 1 or greater
+      keyfile: /home/src/mw-creds.json
+      OPTIONAL_CONFIG: VALUE  
+```
+
+#### Pipeline
+
+Here is a screenshot of the pipeline's DAG :
 
 ![alt text](images/image.png)
 
