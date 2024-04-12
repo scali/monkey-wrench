@@ -6,7 +6,7 @@ A data pipeline that use `dbt`, `mage`, `Terraform` and `GCP`
 
 ### Purpose
 
-The aim of this project is to build a dashboard to track the occurrences (i.e. human sightings) of Cougar (_Puma concolor_) over several years and over few Southwestern states of the United States and their National Parks
+The aim of this project is to build a dashboard to track the occurrences (i.e. human sightings) of Cougar (_Puma concolor_) **over several years** and **over few Southwestern states of the United States and their National Parks**
 
 > [!NOTE]
 > Southwestern states selection for this project : `Colorado`, `Arizona`, `Texas`, `California`, `New mexico`, `Utah` and `Nevada`
@@ -25,7 +25,7 @@ The data is ingested through a batch job on a monthly basis orchestrated through
 
 - Main dataset: [GBIF Species Occurrences](https://console.cloud.google.com/marketplace/product/bigquery-public-data/gbif-occurrence) (BigQuery Public Data), more than 2 billions of records
 - Additional dataset: List of the southern state of United State
-- Additional dataset: 
+- Additional dataset: Spatial information (spatial extent) of the National Parks of United states
 
 
 ## Technical Description
@@ -311,14 +311,30 @@ bigquery-db:
 
 #### Pipeline
 
+The pipeline is mainly interacting with `BigQuery` directly in SQL, as there is no need to pull the data in a dataframe here, everything can take place in `BigQuery`.
+
+Data is transformed _before_ being partitionned and clustered.
+- Cluster by National Park Name (field `unit_name`) because we need to filter/query the data by National Park Name or by the State where they are located
+- Partition by year (field `eventdate` truncated to year) because we need to browse the data by year
+
 Here is a screenshot of the pipeline's DAG :
 
-![alt text](images/image.png)
+![pipeline DAG](images/image.png)
+
+For more details of the step of the pipeline, see directly in `mage`
 
 #### Trigger / Batch Automation
 
 The pipeline is configured to run on an annual basis
 
-![alt text](images/image-1.png)
+![pipeline trigger](images/image-1.png)
 
 ### Visualize the data
+
+A simple dashboard has been build in Google Looker
+
+Here is the link the the dashboard : https://lookerstudio.google.com/s/j9yxgFPSwJk
+
+And above, a screenshot of the dashboard :
+
+![dashboard](images/image-2.png)
