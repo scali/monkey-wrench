@@ -1,0 +1,14 @@
+sources:
+- description: Dataframes Mage upstream blocks
+  loader: mage
+  name: mage_mw
+  schema: mw_dataset
+  tables:
+  - description: Dataframe for block `national_parks_boundaries` of the `mw_gbif_subset`
+      mage pipeline.
+    identifier: mage_mw_gbif_subset_national_parks_boundaries
+    meta:
+      block_uuid: national_parks_boundaries
+      pipeline_uuid: mw_gbif_subset
+    name: mw_gbif_subset_national_parks_boundaries
+version: 2

@@ -1,0 +1,12 @@
+# https://docs.getdbt.com/docs/core/connect-data-platform/profiles.yml
+bigquery-db:
+  target: staging
+  outputs:
+    staging:
+      type: bigquery
+      method: service-account
+      project: monkey-wrench-418607
+      dataset: mw_dataset
+      threads: 4 # Must be a value of 1 or greater
+      keyfile: /home/src/mw-creds.json
+      OPTIONAL_CONFIG: VALUE  
