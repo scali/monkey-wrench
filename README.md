@@ -6,7 +6,10 @@ A data pipeline that use `dbt`, `mage`, `Terraform` and `GCP`
 
 ### Purpose
 
-The aim of this project is to build a dashboard to track the occurrences (i.e. human sightings) of Cougar (_Puma concolor_) over several years and over the Southwestern states of the United States.
+The aim of this project is to build a dashboard to track the occurrences (i.e. human sightings) of Cougar (_Puma concolor_) over several years and over few Southwestern states of the United States and their National Parks
+
+> [!NOTE]
+> Southwestern states selection for this project : `Colorado`, `Arizona`, `Texas`, `California`, `New mexico`, `Utah` and `Nevada`
 
 ### Process
 
@@ -21,8 +24,8 @@ The data is ingested through a batch job on a monthly basis orchestrated through
 ### Dataset
 
 - Main dataset: [GBIF Species Occurrences](https://console.cloud.google.com/marketplace/product/bigquery-public-data/gbif-occurrence) (BigQuery Public Data), more than 2 billions of records
-- Additional dataset: List of the southern state of United State, used as a `seed` in `dbt`
-- Additional dataset: ⭕
+- Additional dataset: List of the southern state of United State
+- Additional dataset: 
 
 
 ## Technical Description
@@ -146,7 +149,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud iam service-accounts keys create ./gcp/keys/mw-creds.json --iam-account $SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com
 ```
 
-### Setup a virtual machine on GCP with IaaC tools
+### Setup a virtual machine and storage on GCP with IaaC tools
 
 4. create a file `./terraform/secret.tfvars` to store the VM root password
 
@@ -157,7 +160,7 @@ gcloud iam service-accounts keys create ./gcp/keys/mw-creds.json --iam-account $
 echo 'vm_root_password = "<secret password here>" > ./terraform/secret.tfvars
 ```
 
-5. Launch the creation of VM through `terraform`
+5. Launch the creation of VM and storage through `terraform`
 
 ```sh
 terraform -chdir=terraform init
@@ -168,7 +171,7 @@ terraform -chdir=terraform apply -var-file="secret.tfvars"
 ```
 
 > [!IMPORTANT]
-> keep a copy of the output IP adress
+> keep a copy of the output IP address
 > e.g. : ad_ip_address = "35.247.99.54"
 
 6. Once created, connect to the VM with `gcloud`
@@ -193,6 +196,40 @@ Resume the VM (make it alive) :
 
 ```sh
 gcloud compute instances resume monkey-wrench-vm
+```
+
+### Datalake : Setup a Google storage
+
+`Google cloud storage bucket` have already been initialized by terraform
+
+#### Load data in `GS`
+
+We load a sample dataset to `GS`
+
+```sh
+gcloud storage cp data/parks-bounds.geojsonl gs://mw_bucket
+```
+
+The `geojsonl` files will be processed furthermore by `mage`
+
+Alternatively, it is also possible to load those `geojsonl` files with `bq` CLI, but this is out of the scope of this project
+
+```sh
+bq load --source_format=NEWLINE_DELIMITED_JSON  --json_extension=GEOJSON --autodetect mw_dataset.us_national_parks gs://mw_bucket/parks-bounds.geojsonl
+```
+
+### Datawarehouse : Setup a BigQuery Dataset
+
+0. (Optional) Create an BigQuery Dataset with `bq` CLI
+
+> [!IMPORTANT]
+> This dataset has been initialized via terraform, this command above is just for information
+
+```sh
+bq --location=europe-north1 mk \
+    --dataset \
+    --description="Monkey Wrench dataset" \
+    mw_us_dataset
 ```
 
 ### Configure the virtual machine on GCP
@@ -223,77 +260,36 @@ cat <<EOF >>.env
 <<put here a copy of you .env file>>
 EOF
 
-# Launch mage
+cat <<EOF >>mw-creds.json
+<<put here a copy of you ./gcp/keys/mw-creds.json file>>
+EOF
+
+# Launch mage (may take some time to download and extrat ~10min on a e2-micro or e2-medium VM)
 docker-compose up -d
 ```
 
-### Datalake : Setup a Google storage
-
-#### Load data in `GS`
-
-TODO : do it in MAGE with Fiona python library https://github.com/Toblerity/Fiona
-
-uri GeoJSON
-tranform data in MAGE with python Fiona
-Load to GS
-
- url = 'https://raw.githubusercontent.com/nationalparkservice/data/gh-pages/base_data/boundaries/parks/parks-bounds.geojson'
-    
- cat parks-bounds.geojson | jq -c '.features[]' > parks-bounds.geojsonl
-
- bq load --source_format=NEWLINE_DELIMITED_JSON  --json_extension=GEOJSON --autodetect mw_dataset.us_national_parks gs://mybucket/fed-samples/fed-sample*
-
-
-### Datawarehousing : Setup a BigQuery Dataset
-
-0. (Optional) Create an BigQuery Dataset with `bq` CLI
+Then launch a web brower to `http://<ad_ip_address>` with the external IP of your GCP VM, provided by the terraform output `<ad_ip_address>`
 
 > [!IMPORTANT]
-> This dataset has been initialized via terraform, this command above is just for information
+> use `http` and not `https`, as we didn't dive into security here
 
-```sh
-bq --location=europe-north1 mk \
-    --dataset \
-    --description="Monkey Wrench dataset" \
-    mw_us_dataset
-```
+Default login is `admin@admin.com`
 
-1. 
+> [!IMPORTANT]
+> change your admin password here : http://<ad_ip_address>/settings/workspace/users/1
 
-```sh
-cat <<EOF > query.txt
-CREATE OR REPLACE TABLE \`mw_us_dataset.mp\` AS
-SELECT count(1) as counting, stateprovince
-FROM \`bigquery-public-data.gbif.occurrences\`
-WHERE species = 'Puma concolor'
-AND countrycode = 'US' AND occurrencestatus = 'PRESENT'
-  AND decimallatitude IS NOT NULL AND decimallongitude IS NOT NULL
-  GROUP BY stateprovince
-EOF
-```
+### Workflow orchestration : Extract, Transform, Load the data
 
-```sh
-## slurp in the query file with bq cli 
-bq --location=us query --nouse_legacy_sql "$(< query.txt)"
-```
+Launch `mage`, and the pipeline named `mw_gbif_subset`
 
-bq --location=europe-north1 query --nouse_legacy_sql \
-'
-'
+Here is a screenshot of the DAG of the pipeline :
 
+![alt text](image.png)
 
+#### Trigger / Batch Automation
 
-bq --location=europe-north1 query --nouse_legacy_sql \
-'CREATE OR REPLACE TABLE `mw_dataset.my_tabme` AS
-SELECT
-   1 as hello
-'
+The pipeline is configured to run on an annual basis
 
-monkey-wrench-418607
+![alt text](image-1.png)
 
-'CREATE OR REPLACE TABLE `$PROJECT_ID.mw_dataset.external_yellow_tripdata_partitioned_clustered`
-SELECT
-   COUNT(*)
- FROM
-   `bigquery-public-data`.samples.shakespeare'
-```
+### Visualize the data
