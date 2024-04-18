@@ -32,14 +32,22 @@ The data is ingested through a batch job on a monthly basis orchestrated through
 
 ### Tools and technologies
 
-- Cloud - Google Cloud Platform
-- IaaC - Terraform
-- Containerization - Docker
-- Orchestration - Mage
-- Transformation - dbt (bundled in mage)
-- Data Lake - Google Cloud Storage
-- Data Warehouse - BigQuery
-- Data Visualization - Looker (or alternatively Apache Superset)
+
+![](https://img.shields.io/badge/Google%20Cloud%20Platform-Cloud-48f?style=for-the-badge&logo=googlecloud)
+
+![](https://img.shields.io/badge/Terraform-IaaC-85c?style=for-the-badge&logo=terraform)
+
+![](https://img.shields.io/badge/docker-Containerization-29f?style=for-the-badge&logo=docker)
+
+![](https://img.shields.io/badge/Mage-Orchestration-fa0?style=for-the-badge&logo=googlecloud)
+
+![](https://img.shields.io/badge/dbt-Transformation-f72?style=for-the-badge&logo=dbt)
+
+![](https://img.shields.io/badge/Google%20Cloud%20Storage-Data%20Lake-48f?style=for-the-badge&logo=googlecloud)
+
+![](https://img.shields.io/badge/Bigquery-Data%20Warehouse-48f?style=for-the-badge&logo=googlecloud)
+
+![](https://img.shields.io/badge/Looker-Data%20Visualization-48f?style=for-the-badge&logo=looker)
 
 ### Architecture
 
