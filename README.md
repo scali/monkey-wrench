@@ -87,6 +87,16 @@ flowchart TB
 	mage -- load --> bq
 	dbt -- "transform in place" --> bq
 	bq -- query --> loo
+
+
+style tf fill:#85c,stroke:#fff,color:#494949
+style gs fill:#48f,stroke:#fff,color:#494949
+style gcloud fill:#48f,stroke:#fff,color:#494949
+style bql fill:#48f,stroke:#fff,color:#494949
+style bq fill:#48f,stroke:#fff,color:#494949
+style mage fill:#fa0,stroke:#fff,color:#494949
+style dbt fill:#f72,stroke:#fff,color:#494949
+style loo fill:#48f,stroke:#fff,color:#494949
 ```
 
 
