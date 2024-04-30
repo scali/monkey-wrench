@@ -85,7 +85,7 @@ flowchart TB
 	gs -- extract --> mage
 	mage -- transform --> mage
 	mage -- load --> bq
-	dbt -- "tranform in place" --> bq
+	dbt -- "transform in place" --> bq
 	bq -- query --> loo
 ```
 
